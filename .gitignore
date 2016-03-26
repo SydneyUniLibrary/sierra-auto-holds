@@ -1,0 +1,6 @@
+/.idea/
+*.iml
+db.sqlite3
+/media/
+/.venv/
+sierrasettings.py
