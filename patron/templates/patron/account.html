@@ -1,0 +1,160 @@
+{% extends 'patron/base.html' %}
+{% load staticfiles %}
+
+{% block panel-heading %}{{ patron_name }}{% endblock %}
+
+{% block panel-body %}
+<div class="container-fluid">
+    <div class="row form">
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="pickup-location">
+                    Pickup Location
+                    <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-help-for="pickup-location"></span>
+                </label>
+                <select id="pickup-location" class="form-control"
+                        data-toggle="tooltip" data-placement="bottom"
+                        title="Change where you want to pickup the holds we place for you. Note this only changes new holds, not existing holds.">
+                    {% for x in pickup_locations %}
+                        {% if x == patron.pickup_location %}
+                            <option value="{{ x.id }}" selected>{{ x.name }}</option>
+                        {% else %}
+                            <option value="{{ x.id }}">{{ x.name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="default-format">
+                    Preferred Format
+                    <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-help-for="default-format"></span>
+                </label>
+                <select id="default-format" class="form-control"
+                        data-toggle="tooltip" data-placement="bottom"
+                        title="Choose which format you prefer the most">
+                    {% for x in formats %}
+                        {% if x == patron.default_format %}
+                            <option value="{{ x.id }}" selected>{{ x.value }}</option>
+                        {% else %}
+                            <option value="{{ x.id }}">{{ x.value }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="default-language">
+                    Preferred Language
+                    <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-help-for="default-language"></span>
+                </label>
+                <select id="default-language" class="form-control"
+                        data-toggle="tooltip" data-placement="bottom"
+                        title="Choose the language you prefer to read in the most">
+                    {% for x in languages %}
+                        {% if x == patron.default_language %}
+                            <option value="{{ x.id }}" selected>{{ x.name }}</option>
+                        {% else %}
+                            <option value="{{ x.id }}">{{ x.name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Author</th>
+                        <th>Format</th>
+                        <th>Language</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <form class="form" action="{% url 'patron:add_registration' %}" method="post">
+                        <tr class="success">
+                            {%  csrf_token %}
+                            <td>
+                                <select id="add-author" name="author" class="form-control">
+                                    <option value="0" selected></option>
+                                    {% for x in authors %}
+                                        <option value="{{ x.id }}">{{ x.friendly_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <select id="add-format" name="format" class="form-control">
+                                    {% for x in formats %}
+                                        {% if x == patron.default_format %}
+                                            <option value="{{ x.id }}" selected>{{ x.value }}</option>
+                                        {% else %}
+                                            <option value="{{ x.id }}">{{ x.value }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <select id="add-language" name="language" class="form-control">
+                                    {% for x in languages %}
+                                        {% if x == patron.default_language %}
+                                            <option value="{{ x.id }}" selected>{{ x.name }}</option>
+                                        {% else %}
+                                            <option value="{{ x.id }}">{{ x.name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <button type="submit" id="add-button" class="btn btn-success">
+                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                </button>
+                            </td>
+                        </tr>
+                    </form>
+                    <form id="remove-form" class="form" action="{% url 'patron:remove_registration' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="id" id="remove-form-id">
+                        {% for x in registrations %}
+                            <tr id="reg-{{ x.id }}">
+                                <td>{{ x.author.friendly_name }}</td>
+                                <td>{{ x.format.value }}</td>
+                                <td>{{ x.language.name }}</td>
+                                <td>
+                                    <button class="btn btn-danger" data-remove-button="{{ x.id }}">
+                                        <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </form>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock panel-body %}
+
+{% block scripts-extra %}
+    <script src="{% static 'patron/account.js' %}"></script>
+    <script>
+        $(function () {
+            {% for m in messages %}
+                {% if m.level == DEFAULT_MESSAGE_LEVELS.INFO %}
+                    showToast('info', "{{ m | escapejs }}");
+                {% elif m.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                    showToast('success', "{{ m | escapejs }}");
+                {% elif m.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+                    showToast('warning', "{{ m | escapejs }}");
+                {% elif m.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                    showToast('error', "{{ m | escapejs }}");
+                {% endif %}
+            {% endfor %}
+        });
+    </script>
+{% endblock %}

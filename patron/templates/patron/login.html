@@ -1,0 +1,32 @@
+{% extends 'patron/base.html' %}
+
+{% block navbar-logout %}{% endblock %}
+
+{% block pre-panel %}
+    {% for m in messages %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="alert alert-info">{{ m }}</div>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}
+
+{% block panel-heading %}Enter your barcode to log in{% endblock %}
+
+{% block panel-body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <form class="form-inline" action="{% url 'patron:login' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="barcode">Barcode</label>
+                    <input type="password" name="barcode" id="barcode">
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock panel-body %}
