@@ -24,7 +24,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
 from patron.models import Author, Format, Language, Patron, PickupLocation, Registration
-from sierra.api import SierraApi_v3
+from sierra.api import SierraApi_v2
 
 
 def account(request):
@@ -139,9 +139,9 @@ def remove_registration(request):
 def _sierra_api_in_session(request):
     try:
         access_token = request.session['sierra_api_access_token']
-        return SierraApi_v3.attach(settings.SIERRA_API.base_url, access_token)
+        return SierraApi_v2.attach(settings.SIERRA_API.base_url, access_token)
     except KeyError:
-        sierra_api = SierraApi_v3.login(
+        sierra_api = SierraApi_v2.login(
             settings.SIERRA_API.base_url,
             settings.SIERRA_API.client_key,
             settings.SIERRA_API.client_secret

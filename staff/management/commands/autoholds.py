@@ -23,7 +23,7 @@ from django.core.management.base import BaseCommand
 from django.utils.timezone import localtime, make_aware, now
 
 from patron.models import Registration
-from sierra.api import SierraApi_v3, SierraApiError
+from sierra.api import SierraApi_v2, SierraApiError
 
 
 class Command(BaseCommand):
@@ -34,7 +34,7 @@ class Command(BaseCommand):
         datetime_last_run = make_aware(datetime(2016, 3, 4))  # TODO: Track and retrieve last run date/time
         datetime_now = now()
 
-        sierra_api = SierraApi_v3.login(
+        sierra_api = SierraApi_v2.login(
                 settings.SIERRA_API.base_url,
                 settings.SIERRA_API.client_key,
                 settings.SIERRA_API.client_secret

@@ -42,18 +42,18 @@ class SierraApiError(Exception):
             )
 
 
-class SierraApi_v3:
+class SierraApi_v2:
 
     @staticmethod
     def login(base_url, client_key, client_secret):
-        sierra_api = SierraApi_v3(base_url)
+        sierra_api = SierraApi_v2(base_url)
         access_token = sierra_api._do_login(client_key, client_secret)
         sierra_api._do_attach(access_token)
         return sierra_api
 
     @staticmethod
     def attach(base_url, access_token):
-        sierra_api = SierraApi_v3(base_url)
+        sierra_api = SierraApi_v2(base_url)
         sierra_api._do_attach(access_token)
         return sierra_api
 
@@ -63,12 +63,12 @@ class SierraApi_v3:
         self.access_token = None
 
     def _absolute_url(self, relative_url):
-        return self.base_url + relative_url
+        return self.base_url + '/v2/' + relative_url
 
     def _do_login(self, client_key, client_secret):
         encoded_secret = b64encode('{}:{}'.format(client_key, client_secret).encode()).decode()
         response = self._session.post(
-            self._absolute_url('/v3/token'),
+            self._absolute_url('token'),
             headers={'Authorization': 'Basic ' + encoded_secret},
             data={'grant_type': 'client_credentials'}
         )
@@ -118,7 +118,7 @@ class SierraApi_v3:
             params['deleted'] = bool(deleted)
         if suppressed is not None:
             params['suppressed'] = bool(suppressed)
-        response = self._get('/v3/bibs', params)
+        response = self._get('bibs', params)
         if response.status_code == 200:
             return response.json()
         else:
@@ -126,7 +126,7 @@ class SierraApi_v3:
 
     def bibs_get_for_id(self, bib_id, *, fields=None):
         params = None if fields is None else {'fields': fields}
-        response = self._get('/v3/bibs/{}'.format(bib_id), params)
+        response = self._get('bibs/{}'.format(bib_id), params)
         if response.status_code == 200:
             return response.json()
         else:
@@ -136,7 +136,7 @@ class SierraApi_v3:
         params = {'barcode': str(barcode)}
         if fields is not None:
             params['fields'] = str(fields)
-        response = self._get('/v3/patrons/find', params)
+        response = self._get('patrons/find', params)
         if response.status_code == 200:
             return response.json()
         elif response.status_code == 404:
@@ -150,7 +150,7 @@ class SierraApi_v3:
             'recordNumber': int(record_rec_num),
             'pickupLocation': str(pickup_location)
         }
-        response = self._post_json('/v3/patrons/{}/holds/requests'.format(patron_rec_num), json)
+        response = self._post_json('patrons/{}/holds/requests'.format(patron_rec_num), json)
         if response.status_code == 200:
             return
         else:
