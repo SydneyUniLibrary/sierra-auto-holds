@@ -157,6 +157,14 @@ STATICFILES_DIRS = [
 ]
 
 
+# Security settings
+
+# CSRF_COOKIE_HTTPONLY = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'
+
+
 # Default values to use when creating a new AutoHolds patron
 # and the Sierra patron's values can't be used.
 
