@@ -50,15 +50,15 @@ class SierraSqlSettings:
 
 
 SIERRA_API = SierraApiSettings(
-        base_url='https://sierra-app-server.mylibrary.url/iii/sierra-api',
-        client_key='ABCDefgh1234',
-        client_secret='password',
+        base_url='''https://sierra-app-server.mylibrary.url/iii/sierra-api''',
+        client_key='''key''',
+        client_secret='''secret''',
 )
 
 
 SIERRA_SQL = SierraSqlSettings(
-    host='sierra-db-server.mylibrary.url',
+    host='''sierra-db-server.mylibrary.url''',
     port=1032,
-    user='sql-enabled-sierra-user',
-    password='password',
+    user='''autoholds''',
+    password='''pass''',
 )
