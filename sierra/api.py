@@ -19,6 +19,7 @@
 from base64 import b64encode
 from datetime import datetime, timezone
 
+from django.utils.dateparse import parse_datetime
 import requests
 
 
@@ -157,3 +158,10 @@ class SierraApi_v2:
             return
         else:
             raise SierraApiError(**response.json())
+
+    @staticmethod
+    def parse_datetime(datetime_str):
+        dt = parse_datetime(datetime_str)
+        if dt is None:
+            raise ValueError('{} is not a valid date/time format'.format(datetime_str))
+        return dt
