@@ -24,6 +24,12 @@ class Log(models.Model):
     log_updated_at = models.DateTimeField(auto_now=True, editable=False)
     log_notes = models.TextField(editable=False)
 
+    def append_log_note(self, log_note):
+        if self.log_notes:
+            self.log_notes = self.log_notes + '\n' + log_note
+        else:
+            self.log_notes = log_note
+
     class Meta:
         abstract = True
 
