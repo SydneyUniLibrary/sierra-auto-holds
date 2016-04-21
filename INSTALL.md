@@ -234,3 +234,13 @@ Follow through the [Django documentation](https://docs.djangoproject.com/en/1.9/
 Particularly take a look at the [deployment checklist](https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/).
 
 Strongly consider getting a certificate for your server and only using HTTPS for the AutoHolds app.
+
+
+Setup autoholds to run
+----------------------
+
+1. Create a cron job to run `python manage.py autoholds`.
+
+For autoholds to run, the current working directory needs to be the install directory. Include a command to `cd` to the install directory in the cron job.
+
+How often the cron job runs is up to you. Either hourly or daily might work for you.
