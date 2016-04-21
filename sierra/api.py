@@ -121,6 +121,8 @@ class SierraApi_v2:
         response = self._get('bibs', params)
         if response.status_code == 200:
             return response.json()
+        elif response.status_code == 404:
+            return {'total': 0, 'entries': list()}
         else:
             raise SierraApiError(**response.json())
 
