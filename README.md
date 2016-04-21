@@ -1,8 +1,8 @@
 AutoHolds
 =========
 
-AutoHolds is a Python Django web application that allows patrons of Sierra libraries to register interest in authors
-and automatically have holds placed whenever that library get a new title by that author.
+AutoHolds is a Python Django web application that allows patrons of [Sierra](https://www.iii.com/products/sierra) libraries 
+to register interest in authors and automatically have holds placed whenever the library gets a new title by that author.
 
 
 
@@ -47,7 +47,7 @@ Contributors
 
 * [David Mitchell, London Public Library](https://twitter.com/wvrent)
 * [Jim Nicholls, The University of Sydney](https://github.com/SydneyUniLibrary-Jim)
-* [Susan Bennet, Geauga County Public Library](https://www.linkedin.com/in/susan-bennett-20600524)
+* [Susan Bennett, Geauga County Public Library](https://www.linkedin.com/in/susan-bennett-20600524)
 
 
 Portions of this program are Copyright 2011-2015 Twitter, Inc., included under the MIT license.
