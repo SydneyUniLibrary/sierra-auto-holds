@@ -50,8 +50,8 @@ Contributors
 * [Susan Bennett, Geauga County Public Library](https://www.linkedin.com/in/susan-bennett-20600524)
 
 
-Portions of this program are Copyright 2011-2015 Twitter, Inc., included under the MIT license.
+### 3rd-party contributions
 
-Portions of this program are Copyright jQuery Foundation, included under the MIT license.
-
-Portions of this program are Copyright Kamran Ahmed, included under the MIT license.
+* This program includes [Bootstrap](https://getbootstrap.com/). Copyright 2011-2015 Twitter, Inc.
+* This program includes [jQuery](https://jquery.com/). Copyright jQuery Foundation.
+* This program includes the [jQuery Toast Plugin](http://kamranahmed.info/toast). Copyright Kamran Ahmed.
