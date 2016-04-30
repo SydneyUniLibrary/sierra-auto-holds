@@ -30,6 +30,8 @@ from ...models import BibLog, HoldLog, RunLog
 
 class Command(BaseCommand):
 
+    MAXIMUM_BATCHES_PER_RUN = 10
+
     help = 'Discover new bib records and place auto-holds on them'
 
     def __init__(self, *args, **kwargs):
@@ -52,41 +54,13 @@ class Command(BaseCommand):
                 'The last bib that was seen in previous runs was .b{}a, created at {}.',
                 last_bib_record_number, localtime(last_bib_created_at)
             )
-            new_bibs = self._get_new_bibs(last_bib_created_at, run_log.started_at)
-            # new_bibs = self._get_bibs(4862249, 4862252, 4862294)
-            run_log.num_bibs_found = len(new_bibs)
-            self._log_info(
-                run_log,
-                'Found {} new bib records created since {}',
-                run_log.num_bibs_found, localtime(last_bib_created_at)
-            )
-            for bib in new_bibs:
-                try:
-                    bib_record_number = int(bib['id'])
-                except ValueError as e:
-                    self._log_error(
-                        run_log,
-                        'Failed to convert bib id {} to an integer: {}',
-                        bib.get('id', '?'), e
-                    )
-                    self._log_exception_details(run_log, sys.exc_info())
-                    continue
-                if bib_record_number <= last_bib_record_number:
-                    self._log_notice(
-                        run_log,
-                        'Skipping .b{}a because it has already seen during a previous run',
-                        bib_record_number
-                    )
-                    continue
-                try:
-                    self._process_bib(bib, bib_record_number, run_log)
-                except Exception as e:
-                    self._log_error(
-                        run_log,
-                        'An error occurred while processing .b{}a: {}',
-                        bib_record_number, e
-                    )
-                    self._log_exception_details(run_log, sys.exc_info())
+            num_batches = 0
+            num_bibs_found = 1  # Force at-least one iteration of the following loop
+            while num_bibs_found > 0 and num_batches < self.MAXIMUM_BATCHES_PER_RUN:
+                num_batches += 1
+                num_bibs_found, last_bib_created_at, last_bib_record_number = (
+                    self._process_batch(last_bib_created_at, last_bib_record_number, run_log)
+                )
         except Exception as e:
             self._log_error(run_log, 'An error occurred while autoholds was running: {}', e)
             self._log_exception_details(run_log, sys.exc_info())
@@ -125,6 +99,49 @@ class Command(BaseCommand):
             last_bib_created_at = now()
         #
         return last_bib_record_number, last_bib_created_at
+
+    def _process_batch(self, last_bib_created_at, last_bib_record_number, run_log):
+        new_bibs = self._get_new_bibs(last_bib_created_at, run_log.started_at)
+        num_bibs_found = len(new_bibs)
+        run_log.num_bibs_found += num_bibs_found
+        self._log_info(
+            run_log,
+            'Found {} new bib records created since {}',
+            num_bibs_found, localtime(last_bib_created_at)
+        )
+        for bib in new_bibs:
+            try:
+                bib_record_number = int(bib['id'])
+            except ValueError as e:
+                self._log_error(
+                    run_log,
+                    'Failed to convert bib id {} to an integer: {}',
+                    bib.get('id', '?'), e
+                )
+                self._log_exception_details(run_log, sys.exc_info())
+                continue
+            if bib_record_number <= last_bib_record_number:
+                self._log_notice(
+                    run_log,
+                    'Skipping .b{}a because it has already seen during a previous run',
+                    bib_record_number
+                )
+                continue
+            else:
+                last_bib_record_number = bib_record_number
+            try:
+                bib_created_at = self._process_bib(bib, bib_record_number, run_log)
+            except Exception as e:
+                self._log_error(
+                    run_log,
+                    'An error occurred while processing .b{}a: {}',
+                    bib_record_number, e
+                )
+                self._log_exception_details(run_log, sys.exc_info())
+                continue
+            if bib_created_at is not None and bib_created_at > last_bib_created_at:
+                last_bib_created_at = bib_created_at
+        return num_bibs_found, last_bib_created_at, last_bib_record_number
 
     def _process_bib(self, bib, bib_record_number, run_log):
         bib_log = BibLog(
@@ -188,6 +205,7 @@ class Command(BaseCommand):
             self._log_exception_details(bib_log, sys.exc_info())
         finally:
             bib_log.save()
+        return bib_log.bib_created_at
 
     def _place_hold(self, bib_record_number, registration, bib_log):
         hold_log = HoldLog(
