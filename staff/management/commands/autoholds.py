@@ -16,13 +16,12 @@
 # along with AutoHolds.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from datetime import datetime
 import sys
 import traceback
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.utils.timezone import localtime, make_aware, now
+from django.utils.timezone import localtime, now
 
 from patron.models import Registration
 from sierra.api import SierraApi_v2, SierraApiError
@@ -47,14 +46,19 @@ class Command(BaseCommand):
                 settings.SIERRA_API.client_key,
                 settings.SIERRA_API.client_secret
             )
-            datetime_last_run = make_aware(datetime(2016, 3, 4))  # TODO: Track and retrieve last run date/time
-            new_bibs = self._get_new_bibs(datetime_last_run, run_log.started_at)
+            last_bib_record_number, last_bib_created_at = self._last_bib_seen()
+            self._log_info(
+                run_log,
+                'The last bib that was seen in previous runs was .b{}a, created at {}.',
+                last_bib_record_number, localtime(last_bib_created_at)
+            )
+            new_bibs = self._get_new_bibs(last_bib_created_at, run_log.started_at)
             # new_bibs = self._get_bibs(4862249, 4862252, 4862294)
             run_log.num_bibs_found = len(new_bibs)
             self._log_info(
                 run_log,
                 'Found {} new bib records created since {}',
-                run_log.num_bibs_found, localtime(datetime_last_run)
+                run_log.num_bibs_found, localtime(last_bib_created_at)
             )
             for bib in new_bibs:
                 try:
@@ -66,6 +70,13 @@ class Command(BaseCommand):
                         bib.get('id', '?'), e
                     )
                     self._log_exception_details(run_log, sys.exc_info())
+                    continue
+                if bib_record_number <= last_bib_record_number:
+                    self._log_notice(
+                        run_log,
+                        'Skipping .b{}a because it has already seen during a previous run',
+                        bib_record_number
+                    )
                     continue
                 try:
                     self._process_bib(bib, bib_record_number, run_log)
@@ -84,6 +95,36 @@ class Command(BaseCommand):
         finally:
             run_log.ended_at = now()
             run_log.save()
+
+    def _last_bib_seen(self):
+        #
+        # Resume find the bib record with the highest id that we've seen previously, and resume from it's creation date.
+        #
+        try:
+            last_biblog = BibLog.objects.order_by('-bib_created_at')[0]
+            last_bib_record_number = last_biblog.bib_record_number
+            last_bib_created_at = last_biblog.bib_created_at
+        except IndexError:
+            last_bib_record_number = 0
+            last_bib_created_at = None
+        #
+        # If we have not seen any bib records before, resume from when we last finished running.
+        # Note: By this point we have already inserted the run log for this current run. So the run log for run previous
+        # to this one is now the second last run in the database when order by ended_at.
+        #
+        if last_bib_created_at is None:
+            try:
+                last_runlog = RunLog.objects.order_by('-ended_at')[1]
+                last_bib_created_at = last_runlog.ended_at
+            except IndexError:
+                last_bib_created_at = None
+        #
+        # If there are no previous runs, resume from now.
+        #
+        if last_bib_created_at is None:
+            last_bib_created_at = now()
+        #
+        return last_bib_record_number, last_bib_created_at
 
     def _process_bib(self, bib, bib_record_number, run_log):
         bib_log = BibLog(
