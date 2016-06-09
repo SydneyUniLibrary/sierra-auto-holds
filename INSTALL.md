@@ -130,10 +130,11 @@ Where replacing values in `sierrasettings.py` be sure to keep the triple quotes 
 Generate a secret key for Django
 --------------------------------
 
-1. Edit `autoholds/settings.py`.
-2. In the `SECRET_KEY` line, change `CHANGE ME` to a long random string.  See the [Django documentation](https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/#secret-key) for details.
+1. In the install directory, create a file called `secret_key.txt` that contains a long random string.
 
-A command like the following one with generate an appropriate random string.
+See the [Django documentation](https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/#secret-key) for details.
+
+A command like the following one with generate an appropriate random string on OS X / Linux.
 
 ```
 tr -dc '[[:graph:]]' < /dev/urandom | head -c 100
