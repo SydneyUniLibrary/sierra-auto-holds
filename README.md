@@ -6,13 +6,15 @@ to register interest in authors and automatically have holds placed whenever the
 
 
 
-! Experimental !
-----------------
+! Not being maintained !
+------------------------
 
-**AutoHolds is not yet ready for production use.** 
+**AutoHolds never reached production use and is not being maintained.** 
 
 It was developed as part of the [IUG 2016 Hackathon](https://www.iii.com/community/inn-side-view/iug-2016-hackathon-recap).
-We are continuing to actively develop and test it at [Geauga County Public Library](https://geaugalibrary.net/).
+There are no plans to further develop this. It is here for preservation purposes.
+
+Please feel free to fork and develop it in any direction you wish.
 
 
 
